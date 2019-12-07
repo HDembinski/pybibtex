@@ -1,0 +1,37 @@
+About pybibtex
+--------------
+
+pybibtex is a drop-in replacement for the program bibtex and
+bibtex-style files. It uses the same data base format and is
+called in the same way. Just replace calls to "bibtex" with
+"pybib" in your compile scripts and you are good to go.
+
+bibtex's style files are written in an ancient language called
+m4, which no one knows anymore. pybibtex allows one to define
+citation styles using simple Python code. The user just
+has to implement a function for each reference type.
+
+A simple formatting function for the article type would be:
+
+def article(bibentry):
+  s = "%(author)s, %(journal)s {\\bf %(volume)s}, %(pages)s (%(year)s)"\
+      % bibentry
+  if "note" in bibentry: s += ", %(note)s" % bibentry
+  return s+"."
+
+pybibtex consists of the package with the same name and the program
+pybib which calls the tools in the package. Usage instructions are given
+below.
+
+Installation
+------------
+
+Copy pybib into a directory listed in the PATH environment variable.
+Copy pybibtex into a directory listed in the PYTHONPATH environment variable.
+
+pybibtex only depends on the Python standard library.
+
+Usage
+-----
+
+Call "pybib --help".

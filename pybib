@@ -1,0 +1,49 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Call pybib like bibtex with your .aux file as an argument. It parses
+the citations inside and looks for the corresponding entries in the
+database. If a style file (.py file) is present in the local path,
+it will be used to format the entries, otherwise a default style is
+used.
+"""
+
+import os
+import argparse
+import imp
+from pybibtex.utils import *
+from pybibtex.bibparser import ParseBib
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('file', metavar='FILE',
+                   help='file to scan for citations')
+args = parser.parse_args()
+
+databases, styleFile = GetBibOptions(args.file)
+
+if not databases:
+  raise SystemExit("No databases")
+
+if styleFile:
+  style = imp.load_source("style",styleFile)
+else:
+  import pybibtex.default_style as style
+
+cites = GetCites(args.file)
+bib = ParseBib(databases)
+
+with open(os.path.splitext(args.file)[0]+".bbl",
+  mode = "w") as pybibFile:
+
+  pybibFile.write("\\begin{thebibliography}{%i}\n"%len(cites))
+  for cite in cites:
+    pybibFile.write("\\bibitem{%s}\n"%cite)
+
+    bibentry = bib.get(cite, None)
+    if bibentry:
+      entry = style.__dict__[bibentry["type"]](bibentry)
+    else:
+      entry = "TODO: ENTRY NOT FOUND"
+
+    pybibFile.write(entry+"\n\n")
+  pybibFile.write("\\end{thebibliography}\n")
